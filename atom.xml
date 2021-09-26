@@ -6,7 +6,7 @@
   <link href="https://forskamse.github.io/atom.xml" rel="self"/>
   
   <link href="https://forskamse.github.io/"/>
-  <updated>2021-08-28T14:00:32.745Z</updated>
+  <updated>2021-09-26T16:20:22.946Z</updated>
   <id>https://forskamse.github.io/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>预训练语言模型综述（三）—— 预训练语言模型的实际使用</title>
+    <link href="https://forskamse.github.io/2021/09/26/2021-09-27-Review_on_Pretrained_Language_Models_Part_III/"/>
+    <id>https://forskamse.github.io/2021/09/26/2021-09-27-Review_on_Pretrained_Language_Models_Part_III/</id>
+    <published>2021-09-26T14:25:50.000Z</published>
+    <updated>2021-09-26T16:20:22.946Z</updated>
+    
+    <content type="html"><![CDATA[<p>本系列文章是笔者以邱锡鹏老师《Pre-trained Models for Natural Language Processing: A Survey》为主要参考材料所做的关于“预训练语言模型综述”的记录，所涉及之素材也包括其他相关综述与未被纳入此综述的工作，分享出来与大家交流讨论。此篇记录预训练语言模型的实际使用。</p><span id="more"></span><h2 id="预训练语言模型的实际使用"><a class="markdownIt-Anchor" href="#预训练语言模型的实际使用"></a> 预训练语言模型的实际使用</h2><p>预训练语言模型的实际使用也是一个复杂的问题，我将其归纳为两个方面。一方面，如何将预训练语言模型应用到NLP的下游任务中，提升模型在下游任务的性能才是预训练语言模型这项技术最终的目标；另一方面，尽管预训练语言模型能给各种NLP任务带来性能上的提升，其带来的大量能源消耗以及对计算资源的依赖也始终受到诸多诟病。</p><h3 id="迁移学习"><a class="markdownIt-Anchor" href="#迁移学习"></a> 迁移学习</h3><p>大量的文献已经表明，预训练语言模型在通用基准测试、问答、情感分析、命名实体识别、机器翻译、摘要等众多下有任务中可以带来喜人的性能提升。目前，将预训练语言模型应用到下游任务中主要还是依赖于迁移学习进行，迁移学习可以把从预训练语言模型从大规模语料（Source Dataset）中学习到的通用语言知识迁移到特定的下游任务（Target Dataset）上，如下图所示。<br /><img src="https://img-blog.csdnimg.cn/d9465a02fbef4dfebef2639b6ddaa201.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBARm9yc2thbXNl,size_20,color_FFFFFF,t_70,g_se,x_16" alt="" /><br />（1）预训练任务、模型结构、语料的选择</p><p>如在<a href="https://forskamse.blog.csdn.net/article/details/118743439">预训练语言模型综述（二）—— 预训练任务及训练策略</a>中所述，我们需要考虑预训练任务对下游任务的影响。例如：NSP可以使预训练语言模型理解两句话之间的关系，因此针对问答、自然语言推理等下游任务，可以考虑NSP作为预训练任务训练预训练语言模型。</p><p>模型结构、语料方面，也需要根据下游任务进行选择。如BERT模型，由于其不具备Encoder-Decoder结构，因此其难以用于生成类任务，相比之下，GPT系列预训练模型则可能在生成类任务上带来更好的性能。语料方面亦是如此，如果具备条件，即有大量domain-specific或是language-specific的语料可用于预训练或有现成预训练模型，使用这些模型或可在相关的下游任务上带来更多提升。</p><p>（2）层的选择</p><p>一个预训练语言模型的不同层可能提取到的特征是不尽相同的。利用这些特征的方式有多种，如仅使用静态的Embedding、顶层表示、全部层的综合表示（按一定方式进行融合）。至于哪一种表示更好或是更适合哪类任务，目前并无定论，还是得通过具体任务的实验来选择。</p><p>（3）微调阶段预训练模型参数是否固化</p><p>我们知道，通常迁移学习包含两个阶段，一是预训练，二是微调。对于一些任务，在微调阶段，预训练模型作为特征抽取器，其参数被固化（如Word Embedding、ELMo（更为典型））。而对于大多数任务，微调阶段预训练模型的参数不固化，仍在微调阶段进行调整，以适应下游任务。前者做法对比后者做法的优点我暂时还无法明确，个人还是倾向于后者。</p><h3 id="模型压缩与加速"><a class="markdownIt-Anchor" href="#模型压缩与加速"></a> 模型压缩与加速</h3><p>为解决大规模预训练语言模型大量消耗能源以及对计算资源依赖的问题，使其可以为更多人员、行业、计算平台所应用，模型压缩与加速是必不可少的。</p><p>其实模型压缩这个话题并不限于预训练语言模型，而是与深度学习模型的发展相伴相生。常见的方法，如剪枝、量化、参数共享、低秩分解、知识蒸馏等，在预训练模型上都已有应用案例，具体文献大家可以看邱老师的综述。</p><p>笔者在此想指出的是硬件加速方面的工作似乎没有得到邱老师这篇Survey的关注，硬件加速将更有利于预训练模型向更多计算平台（尤其是算力有限的平台）。笔者推荐以下一些工作供大家参考：</p><p>[1]S. Pati, S. Aga, N. Jayasena, and M. D. Sinclair, “Demystifying BERT: implications for accelerator design,” p. 17.<br />[2]Y. J. Kim and H. H. Awadalla, “FastFormers: highly efficient transformer models for natural language understanding,” arXiv:2010.13382 [cs], Oct. 2020, Accessed: Sep. 26, 2021. [Online]. Available: <a href="http://arxiv.org/abs/2010.13382">http://arxiv.org/abs/2010.13382</a><br />[3]Z. Liu, G. Li, and J. Cheng, “Hardware acceleration of fully quantized BERT for efficient natural language processing,” arXiv:2103.02800 [cs], Mar. 2021, Accessed: Sep. 26, 2021. [Online]. Available: <a href="http://arxiv.org/abs/2103.02800">http://arxiv.org/abs/2103.02800</a><br />[4]Y. You et al., “Large batch optimization for deep learning: training BERT in 76 minutes,” arXiv:1904.00962 [cs, stat], Jan. 2020, Accessed: Sep. 26, 2021. [Online]. Available: <a href="http://arxiv.org/abs/1904.00962">http://arxiv.org/abs/1904.00962</a></p>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;本系列文章是笔者以邱锡鹏老师《Pre-trained Models for Natural Language Processing: A Survey》为主要参考材料所做的关于“预训练语言模型综述”的记录，所涉及之素材也包括其他相关综述与未被纳入此综述的工作，分享出来与大家交流讨论。此篇记录预训练语言模型的实际使用。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Deep Learning" scheme="https://forskamse.github.io/categories/Deep-Learning/"/>
+    
+    <category term="NLP" scheme="https://forskamse.github.io/categories/NLP/"/>
+    
+    <category term="PTM Special Column" scheme="https://forskamse.github.io/categories/NLP/PTM-Special-Column/"/>
+    
+    
+    <category term="Pre-trained Language Model" scheme="https://forskamse.github.io/tags/Pre-trained-Language-Model/"/>
+    
+    <category term="Language Modeling" scheme="https://forskamse.github.io/tags/Language-Modeling/"/>
+    
+  </entry>
   
   <entry>
     <title>预训练语言模型综述（二）—— 预训练任务及训练策略</title>
